@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @db.VarChar(100)
+  correo    String   @unique @db.VarChar(150)
+  password  String   @map("contrasena") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("creado_en")
+
+  @@map("usuarios")
+}
+
+model Especie {
+  id               Int            @id @default(autoincrement())
+  nombreComun      String         @map("nombre_comun") @db.VarChar(120)
+  nombreCientifico String         @unique @map("nombre_cientifico") @db.VarChar(150)
+  descripcion      String?        @db.Text
+  avistamientos    Avistamiento[]
+
+  @@map("especies")
+}
+
+model Avistamiento {
+  id          Int      @id @default(autoincrement())
+  fecha       DateTime @default(now())
+  ubicacion   String   @db.VarChar(150)
+  cantidad    Int      @default(1)
+  observacion String?  @db.Text
+  especieId   Int      @map("especie_id")
+  especie     Especie  @relation(fields: [especieId], references: [id])
+
+  @@index([especieId], map: "idx_avistamientos_especie_id")
+  @@map("avistamientos")
+}
